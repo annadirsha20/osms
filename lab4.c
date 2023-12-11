@@ -31,7 +31,8 @@ double autocorrelation(int original[], int shifted[], int length, int shift) {
     }
 
     // Вычисление автокорреляции
-    return (double)(matchCount - length / 2) / (length / 2);
+   double p  = (double)1/(length);
+    return (p)*(matchCount - (length - matchCount));
 }
 
 int main() {
