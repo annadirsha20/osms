@@ -3,7 +3,7 @@
 #include <time.h>
 
 
-#define N_LEN 200   //250
+#define N_LEN 350  
 #define G_LEN 5
 int main(){
      srand(time(NULL));
@@ -88,9 +88,9 @@ int main(){
             }
         }
         total_k += k;
-        // printf("%d,", k);
+        printf("%d,", k);
     }
-    printf("Среднее количество ошибок = %f\n", (float)total_k/iter);
+    printf("\nСреднее количество ошибок = %f\n", (float)total_k/iter);
     printf("\n");
     return 0;
 }
