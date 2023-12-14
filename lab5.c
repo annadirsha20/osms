@@ -3,7 +3,7 @@
 #include <time.h>
 
 
-#define N_LEN 350  
+#define N_LEN 300   //250
 #define G_LEN 5
 int main(){
      srand(time(NULL));
@@ -57,40 +57,76 @@ int main(){
     for(int i=N_LEN-G_LEN+1; i < N_LEN; i++) printf("%d", N_c[i]);
     printf(" <- CRC\n\n");
 
+
+
     // Искажение
     int total_k = 0;
     int iter = 1000;
-    for(int u = 0; u<iter; u++){
-        int k=0;
-        for(int o = 0; o<N_LEN; o++){
-            int N_cc[N_LEN];
-            for(int i = 0; i<N_LEN; i++)
-            N_cc[i] = N_Base[i];
-            // Искажение битов по очереди
-            if (N_cc[o] == 1) N_cc[o] = 0;
-            else N_cc[o] = 1;
-        
-            // Искажение рандомных битов
-            if (N_cc[rand()%N_LEN] == 1) N_cc[rand()%N_LEN] = 0;
-            else N_cc[rand()%N_LEN] = 1;
 
+    for(int len_n = 100; len_n < 2000; len_n += 50){
+        int kk=0;
+        for(int package = 0; package < 50; package++){
+            int No[len_n];
+            int No_c[len_n];
+            for(int i = 0; i<len_n-G_LEN+1; i++){
+                No[i] = rand() % 2;
+                No_c[i] = No[i];
+                // N_Base[i] = N[i];
+            }
+            // Добавление нулей в конец
+            for(int i = len_n-G_LEN+1; i < len_n; i++) No[i] = 0;
+            // for(int i = 0; i < len_n; i++) printf("%d", No[i]);
+            // printf("\n");
             // Вычисление XOR и остатка от деления
-            for(int i=0; i < N_LEN-G_LEN+1; i++){
-                if(N_cc[i] == 1){
-                    for(int j=0; j < G_LEN; j++)
-                    N_cc[i+j] ^= G[j];
+            for(int i=0; i < len_n-G_LEN+1; i++){
+                if(No[i] == 1){
+                    for(int j=0; j < G_LEN; j++) 
+                    No[i+j] ^= G[j];
+                 }
+            }
+            // Добавление остатка
+            for(int i=len_n-G_LEN+1; i < len_n; i++){
+            No_c[i] = No[i];
+            }
+            // for(int i = 0; i < len_n; i++) printf("%d", No_c[i]);
+            // printf("^^\n");
+            int k=0;
+            // Получился готовый массив No_c вместе с CRC
+            for(int o = 0; o<len_n; o++){
+                int No_cc[len_n];
+                for(int i = 0; i<len_n; i++)
+                    No_cc[i] = No_c[i];
+                // Искажение битов по очереди
+                if (No_cc[o] == 1) No_cc[o] = 0;
+                else No_cc[o] = 1;
+                // Искажение рандомных битов
+                if (No_cc[rand()%len_n] == 1) No_cc[rand()%len_n] = 0;
+                else No_cc[rand()%len_n] = 1;
+
+                // Вычисление XOR и остатка от деления
+                for(int i=0; i < len_n-G_LEN+1; i++){
+                    if(No_cc[i] == 1){
+                        for(int j=0; j < G_LEN; j++)
+                        No_cc[i+j] ^= G[j];
+                    }
+                }
+                // Проверка на ошибки
+                for(int i = len_n-G_LEN+1; i<len_n; i++){
+                    if(No_cc[i] == 1) break;
+                    if((i == len_n-1) & (No_cc[i] == 0)) k++;
                 }
             }
-            // Проверка на ошибки
-            for(int i = N_LEN-G_LEN+1; i<N_LEN; i++){
-                if(N_cc[i] == 1) break;
-                if((i == N_LEN-1) & (N_cc[i] == 0)) k++;
-            }
+            // if (len_n == 100){
+            //     printf("k=%d ", k);
+            // }
+            //printf("k=%d ", k);
+            kk += k;
         }
-        total_k += k;
-        printf("%d,", k);
+        double err = (double)kk/(double)(len_n*50);
+        fflush(stdout);
+        //printf("N_LEN = %d | err = %f\n", len_n, err);
+        printf("%f, ", err);
     }
-    printf("\nСреднее количество ошибок = %f\n", (float)total_k/iter);
-    printf("\n");
+
     return 0;
 }
